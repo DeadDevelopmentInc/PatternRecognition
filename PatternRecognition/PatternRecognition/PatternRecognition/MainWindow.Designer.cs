@@ -31,6 +31,7 @@ namespace Test
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +43,7 @@ namespace Test
             this.buttonClassify = new System.Windows.Forms.Button();
             this.buttonTrainning = new System.Windows.Forms.Button();
             this.buttonComputeBVW = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -111,9 +112,9 @@ namespace Test
             // 
             // listView1
             // 
-            this.listView1.Location = new System.Drawing.Point(0, 108);
+            this.listView1.Location = new System.Drawing.Point(0, 28);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(895, 608);
+            this.listView1.Size = new System.Drawing.Size(895, 688);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -147,19 +148,15 @@ namespace Test
             this.buttonComputeBVW.UseVisualStyleBackColor = true;
             this.buttonComputeBVW.Click += new System.EventHandler(this.buttonComputeBVW_Click);
             // 
-            // comboBox1
+            // imageList
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(13, 28);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(222, 21);
-            this.comboBox1.TabIndex = 23;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.imageList.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(1214, 741);
-            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.buttonComputeBVW);
             this.Controls.Add(this.buttonTrainning);
             this.Controls.Add(this.buttonClassify);
@@ -193,7 +190,7 @@ namespace Test
         private Button buttonClassify;
         private Button buttonTrainning;
         private Button buttonComputeBVW;
-        private ComboBox comboBox1;
+        private ImageList imageList;
     }
 }
 
