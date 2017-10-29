@@ -55,24 +55,19 @@ namespace Test
         {
             base.OnLoad(e);
 
-            Accord.Math.Random.Generator.Seed = 5;
+            Accord.Math.Random.Generator.Seed = 1;
 
-
-            //Path to own images
             var path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources"));
             
             foreach(DirectoryInfo classFolder in path.EnumerateDirectories())
             {
                 comboBox1.Items.Add(classFolder.Name);
             }
-
-           
         }
 
         private void UploadPicture(DirectoryInfo directoryInfo, EventArgs e)
         {
             listView1.Clear();
-            listView2.Clear();
 
             originalImages = new Dictionary<string, Bitmap>();
             displayImages = new Dictionary<string, Bitmap>();
@@ -81,23 +76,17 @@ namespace Test
             originalTrainImages = new Dictionary<string, Bitmap>();
 
             //Cteate image list with images, put depth, and size
-            ImageList imageListTrain = new ImageList();
-            ImageList imageListTest = new ImageList();
-
-            imageListTrain.ImageSize = new Size(32, 32);
-            imageListTest.ImageSize = new Size(32, 32);
-
-            imageListTrain.ColorDepth = ColorDepth.Depth8Bit;
-            imageListTest.ColorDepth = ColorDepth.Depth8Bit;
-
-            listView1.LargeImageList = imageListTrain;
-            listView2.LargeImageList = imageListTest;
+            ImageList imageList = new ImageList();
+            imageList.ImageSize = new Size(64, 64);
+            imageList.ColorDepth = ColorDepth.Depth8Bit;
+            listView1.LargeImageList = imageList;
 
             string name = directoryInfo.Name;
 
-            ListViewGroup trainingGroup = listView1.Groups.Add(name + " train", name + " train");
-            ListViewGroup testingGroup = listView2.Groups.Add(name + " test", name + " test");
+            ListViewGroup trainingGroup = listView1.Groups.Add(name + ".train", name + ".train");
+            ListViewGroup testingGroup = listView1.Groups.Add(name + ".test", name + ".test");
 
+            // Load the images from the directory that contains images for each class
             FileInfo[] files = GetFilesByExtensions(directoryInfo, ".jpg", ".tif").ToArray();
 
             Vector.Shuffle(files);
@@ -111,9 +100,7 @@ namespace Test
                 string shortName = file.Name;
                 string imageKey = file.FullName;
 
-                imageListTrain.Images.Add(imageKey, image);
-                imageListTest.Images.Add(imageKey, image);
-
+                imageList.Images.Add(imageKey, image);
                 originalImages.Add(imageKey, image);
                 displayImages.Add(imageKey, image);
 
@@ -123,29 +110,22 @@ namespace Test
                     // Put the first 70% in training set
                     item = new ListViewItem(trainingGroup);
                     originalTrainImages.Add(imageKey, image);
-
-                    item.ImageKey = imageKey;
-                    item.Name = shortName;
-                    item.Text = shortName;
-                    item.Tag = new Tuple<double[], int>(null, 0);
-
-                    listView1.Items.Add(item);
                 }
                 else
                 {
                     // Put the restant 30% in test set
                     item = new ListViewItem(testingGroup);
                     originalTestImages.Add(imageKey, image);
-
-                    item.ImageKey = imageKey;
-                    item.Name = shortName;
-                    item.Text = shortName;
-                    item.Tag = new Tuple<double[], int>(null, 0);
-
-                    listView2.Items.Add(item);
                 }
 
-                
+                item.ImageKey = imageKey;
+                item.Name = shortName;
+                item.Text = shortName;
+
+                item.Tag = new Tuple<double[], int>(null, 0);
+
+                listView1.Items.Add(item);
+
             }
         }
 
@@ -190,19 +170,11 @@ namespace Test
         
         private void buttonTrainning_Click(object sender, EventArgs e)
         {
-            IKernel kernel = getKernel();
-
-
-            double complexity = 1.000000000;
-            double tolerance = 0.01;
-            int cacheSize = 1024;
-            SelectionStrategy strategy = 0;
-
+            IKernel kernel = new Gaussian(0.9);
 
             var teacher = new OneclassSupportVectorLearning<IKernel>()
             {
-                Kernel = new Gaussian(0.9)
-
+                Kernel = new Gaussian(0.9),
             };
 
             double[][] inputs;
@@ -231,7 +203,7 @@ namespace Test
             int testingHits = 0;
             int testingMiss = 0;
 
-            foreach (ListViewGroup group in listView2.Groups)
+            foreach (ListViewGroup group in listView1.Groups)
             {
                 foreach (ListViewItem item in group.Items)
                 {
@@ -270,7 +242,7 @@ namespace Test
 
             foreach (ListViewGroup group in listView1.Groups)
             {
-                if (group.Name.EndsWith(" train"))
+                if (group.Name.EndsWith(".train"))
                 {
                     foreach (ListViewItem item in group.Items)
                     {
@@ -284,17 +256,7 @@ namespace Test
             inputs = inputList.ToArray();
             outputs = outputList.ToArray();
         }
-
-        private IKernel getKernel()
-        {
-            return new HistogramIntersection(1, 1);
-        }
-
-        private void listView1_ItemActivate(object sender, EventArgs e)
-        {
-            ImageBox.Show(displayImages[listView1.SelectedItems[0].ImageKey]);
-        }
-
+        
         public static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, params string[] extensions)
         {
             if (extensions == null)
@@ -303,19 +265,19 @@ namespace Test
             return files.Where(f => extensions.Contains(f.Extension));
         }
 
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            string curdir = (string) comboBox1.SelectedItem;
-            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Application.StartupPath, 
+            string curdir = (string)comboBox1.SelectedItem;
+            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Application.StartupPath,
                 "Resources/" + curdir.ToString()));
-            
+
             UploadPicture(directory, e);
+        }
+        
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
