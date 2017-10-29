@@ -36,6 +36,7 @@ namespace Test
 
         //Create SVM
         MulticlassSupportVectorMachine<IKernel> ksvm;
+        SupportVectorMachine<IKernel> supportVectorMachine;
 
         /// <summary>
         /// Initialize component in main window
@@ -54,11 +55,24 @@ namespace Test
         {
             base.OnLoad(e);
 
-            Accord.Math.Random.Generator.Seed = 1;
+            Accord.Math.Random.Generator.Seed = 5;
 
 
             //Path to own images
             var path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources"));
+            
+            foreach(DirectoryInfo classFolder in path.EnumerateDirectories())
+            {
+                comboBox1.Items.Add(classFolder.Name);
+            }
+
+           
+        }
+
+        private void UploadPicture(DirectoryInfo directoryInfo, EventArgs e)
+        {
+            listView1.Clear();
+            listView2.Clear();
 
             originalImages = new Dictionary<string, Bitmap>();
             displayImages = new Dictionary<string, Bitmap>();
@@ -67,61 +81,71 @@ namespace Test
             originalTrainImages = new Dictionary<string, Bitmap>();
 
             //Cteate image list with images, put depth, and size
-            ImageList imageList = new ImageList();
-            imageList.ImageSize = new Size(32, 32);
-            imageList.ColorDepth = ColorDepth.Depth8Bit;
-            listView1.LargeImageList = imageList;
+            ImageList imageListTrain = new ImageList();
+            ImageList imageListTest = new ImageList();
 
-            int currentClassLabel = 0;
+            imageListTrain.ImageSize = new Size(32, 32);
+            imageListTest.ImageSize = new Size(32, 32);
 
+            imageListTrain.ColorDepth = ColorDepth.Depth8Bit;
+            imageListTest.ColorDepth = ColorDepth.Depth8Bit;
 
-            foreach (DirectoryInfo classFolder in path.EnumerateDirectories())
+            listView1.LargeImageList = imageListTrain;
+            listView2.LargeImageList = imageListTest;
+
+            string name = directoryInfo.Name;
+
+            ListViewGroup trainingGroup = listView1.Groups.Add(name + " train", name + " train");
+            ListViewGroup testingGroup = listView2.Groups.Add(name + " test", name + " test");
+
+            FileInfo[] files = GetFilesByExtensions(directoryInfo, ".jpg", ".tif").ToArray();
+
+            Vector.Shuffle(files);
+
+            for (int i = 0; i < files.Length; i++)
             {
-                string name = classFolder.Name;
-                
-                ListViewGroup trainingGroup = listView1.Groups.Add(name + " train", name + " train");
-                ListViewGroup testingGroup = listView1.Groups.Add(name + " test", name + " test");
-                
-                FileInfo[] files = GetFilesByExtensions(classFolder, ".jpg", ".tif").ToArray();
-                
-                Vector.Shuffle(files);
-                
-                for (int i = 0; i < files.Length; i++)
+                FileInfo file = files[i];
+
+                Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
+
+                string shortName = file.Name;
+                string imageKey = file.FullName;
+
+                imageListTrain.Images.Add(imageKey, image);
+                imageListTest.Images.Add(imageKey, image);
+
+                originalImages.Add(imageKey, image);
+                displayImages.Add(imageKey, image);
+
+                ListViewItem item;
+                if ((i / (double)files.Length) < 0.7)
                 {
-                    FileInfo file = files[i];
-
-                    Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
-
-                    string shortName = file.Name;
-                    string imageKey = file.FullName;
-
-                    imageList.Images.Add(imageKey, image);
-                    originalImages.Add(imageKey, image);
-                    displayImages.Add(imageKey, image);
-
-                    ListViewItem item;
-                    if ((i / (double)files.Length) < 0.7)
-                    {
-                        // Put the first 70% in training set
-                        item = new ListViewItem(trainingGroup);
-                        originalTrainImages.Add(imageKey, image);
-                    }
-                    else
-                    {
-                        // Put the restant 30% in test set
-                        item = new ListViewItem(testingGroup);  
-                        originalTestImages.Add(imageKey, image);
-                    }
+                    // Put the first 70% in training set
+                    item = new ListViewItem(trainingGroup);
+                    originalTrainImages.Add(imageKey, image);
 
                     item.ImageKey = imageKey;
                     item.Name = shortName;
                     item.Text = shortName;
-                    item.Tag = new Tuple<double[], int>(null, currentClassLabel);
+                    item.Tag = new Tuple<double[], int>(null, 0);
 
                     listView1.Items.Add(item);
                 }
+                else
+                {
+                    // Put the restant 30% in test set
+                    item = new ListViewItem(testingGroup);
+                    originalTestImages.Add(imageKey, image);
 
-                currentClassLabel++;
+                    item.ImageKey = imageKey;
+                    item.Name = shortName;
+                    item.Text = shortName;
+                    item.Tag = new Tuple<double[], int>(null, 0);
+
+                    listView2.Items.Add(item);
+                }
+
+                
             }
         }
 
@@ -163,8 +187,7 @@ namespace Test
             sw2.Stop();
             
         }
-
-
+        
         private void buttonTrainning_Click(object sender, EventArgs e)
         {
             IKernel kernel = getKernel();
@@ -176,20 +199,10 @@ namespace Test
             SelectionStrategy strategy = 0;
 
 
-            var teacher = new MulticlassSupportVectorLearning<IKernel>()
+            var teacher = new OneclassSupportVectorLearning<IKernel>()
             {
-                Kernel = kernel,
-                Learner = (param) =>
-                {
-                    return new SequentialMinimalOptimization<IKernel>()
-                    {
-                        Kernel = kernel,
-                        Complexity = complexity,
-                        Tolerance = tolerance,
-                        CacheSize = cacheSize,
-                        Strategy = strategy,
-                    };
-                }
+                Kernel = new Gaussian(0.9)
+
             };
 
             double[][] inputs;
@@ -200,17 +213,16 @@ namespace Test
 
             Stopwatch sw = Stopwatch.StartNew();
 
-            this.ksvm = teacher.Learn(inputs, outputs);
+            //this.supportVectorMachine = teacher.Learn(inputs, outputs);
+
+            this.supportVectorMachine = teacher.Learn(inputs);
 
             sw.Stop();
 
-            double error = new ZeroOneLoss(outputs).Loss(ksvm.Decide(inputs));
+            double error = new ZeroOneLoss(outputs).Loss(supportVectorMachine.Decide(inputs));
             
         }
-
-
-
-
+        
         private void buttonClassify_Click(object sender, EventArgs e)
         {
             int trainingHits = 0;
@@ -219,7 +231,7 @@ namespace Test
             int testingHits = 0;
             int testingMiss = 0;
 
-            foreach (ListViewGroup group in listView1.Groups)
+            foreach (ListViewGroup group in listView2.Groups)
             {
                 foreach (ListViewItem item in group.Items)
                 {
@@ -227,7 +239,7 @@ namespace Test
                     double[] input = info.Item1;
                     int expected = info.Item2;
 
-                    int actual = ksvm.Decide(input);
+                    int actual = Convert.ToInt32(supportVectorMachine.Decide(input));
 
                     if (expected == actual)
                     {
@@ -250,11 +262,7 @@ namespace Test
             int testingTotal = testingHits + testingMiss;
            
         }
-
-
-
-
-
+        
         private void getData(out double[][] inputs, out int[] outputs)
         {
             List<double[]> inputList = new List<double[]>();
@@ -298,6 +306,16 @@ namespace Test
         private void toolStripMenuItem5_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            string curdir = (string) comboBox1.SelectedItem;
+            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Application.StartupPath, 
+                "Resources/" + curdir.ToString()));
+            
+            UploadPicture(directory, e);
         }
     }
 }

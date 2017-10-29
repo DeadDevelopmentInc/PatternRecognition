@@ -42,6 +42,8 @@ namespace Test
             this.buttonClassify = new System.Windows.Forms.Button();
             this.buttonTrainning = new System.Windows.Forms.Button();
             this.buttonComputeBVW = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.listView2 = new System.Windows.Forms.ListView();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -110,9 +112,9 @@ namespace Test
             // 
             // listView1
             // 
-            this.listView1.Location = new System.Drawing.Point(0, 28);
+            this.listView1.Location = new System.Drawing.Point(0, 108);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(884, 688);
+            this.listView1.Size = new System.Drawing.Size(441, 608);
             this.listView1.TabIndex = 19;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -146,9 +148,28 @@ namespace Test
             this.buttonComputeBVW.UseVisualStyleBackColor = true;
             this.buttonComputeBVW.Click += new System.EventHandler(this.buttonComputeBVW_Click);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(13, 28);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(222, 21);
+            this.comboBox1.TabIndex = 23;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // listView2
+            // 
+            this.listView2.Location = new System.Drawing.Point(448, 108);
+            this.listView2.Name = "listView2";
+            this.listView2.Size = new System.Drawing.Size(447, 608);
+            this.listView2.TabIndex = 24;
+            this.listView2.UseCompatibleStateImageBehavior = false;
+            // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(1214, 741);
+            this.Controls.Add(this.listView2);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.buttonComputeBVW);
             this.Controls.Add(this.buttonTrainning);
             this.Controls.Add(this.buttonClassify);
@@ -182,6 +203,8 @@ namespace Test
         private Button buttonClassify;
         private Button buttonTrainning;
         private Button buttonComputeBVW;
+        private ComboBox comboBox1;
+        private ListView listView2;
     }
 }
 
