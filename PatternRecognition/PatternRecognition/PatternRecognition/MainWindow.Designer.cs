@@ -44,6 +44,9 @@ namespace Test
             this.buttonTrainning = new System.Windows.Forms.Button();
             this.buttonComputeBVW = new System.Windows.Forms.Button();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            //this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -112,9 +115,9 @@ namespace Test
             // 
             // listView1
             // 
-            this.listView1.Location = new System.Drawing.Point(0, 28);
+            this.listView1.Location = new System.Drawing.Point(0, 147);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(895, 688);
+            this.listView1.Size = new System.Drawing.Size(895, 569);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
@@ -154,9 +157,26 @@ namespace Test
             this.imageList.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.Location = new System.Drawing.Point(13, 29);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 23;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(13, 118);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(865, 23);
+            this.progressBar1.TabIndex = 24;
+            // 
             // MainWindow
             // 
             this.ClientSize = new System.Drawing.Size(1214, 741);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.buttonComputeBVW);
             this.Controls.Add(this.buttonTrainning);
             this.Controls.Add(this.buttonClassify);
@@ -191,6 +211,8 @@ namespace Test
         private Button buttonTrainning;
         private Button buttonComputeBVW;
         private ImageList imageList;
+        private ComboBox comboBox1;
+        private ProgressBar progressBar1;
     }
 }
 
