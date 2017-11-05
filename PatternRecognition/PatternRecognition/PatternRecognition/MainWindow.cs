@@ -1,5 +1,7 @@
 ﻿//#define MulticlassSVM
 #define OneclassSVM
+//#define SURF
+#define HOG
 //#define BackgroundWorker
 
 using System;
@@ -35,6 +37,8 @@ namespace Test
 
         Dictionary<string, Bitmap> originalImages;
         Dictionary<string, Bitmap> displayImages;
+
+        bool fl = false;
 
 
 #if (BackgroundWorker)
@@ -90,9 +94,19 @@ namespace Test
         private void UploadImageFromFolder(DirectoryInfo directory ,EventArgs e)
         {
             listView1.Clear();
-
-            Accord.Math.Random.Generator.Seed = 1;
             
+            if(fl)
+            {
+                originalImages.Clear();
+                displayImages.Clear();
+                originalTestImages.Clear();
+                originalTrainImages.Clear();
+
+            }
+
+            fl = true;
+            //Accord.Math.Random.Generator.Seed = 1;
+
             originalImages = new Dictionary<string, Bitmap>();
             displayImages = new Dictionary<string, Bitmap>();
 
@@ -173,30 +187,47 @@ namespace Test
             
             Stopwatch sw1 = Stopwatch.StartNew();
 
-            IBagOfWords<Bitmap> bow;
+#if (SURF)
 
-
+            IBagOfWords<Bitmap> bagOfVisualWords;
+            
             BinarySplit binarySplit = new BinarySplit(numberOfWords);
 
-            BagOfVisualWords surfBow = new BagOfVisualWords(binarySplit);
+            BagOfVisualWords surfbagOfVisualWords = new BagOfVisualWords(binarySplit);
 
-            bow = surfBow.Learn(originalTrainImages.Values.ToArray());
+            bagOfVisualWords = surfbagOfVisualWords.Learn(originalTrainImages.Values.ToArray());
+
+#elif (HOG)
+
+            var bagOfVisualWords = BagOfVisualWords.Create(new LocalBinaryPattern(), new BinarySplit(numberOfWords));
+
+            bagOfVisualWords.Clustering.ComputeCovariances = false;
+            bagOfVisualWords.Clustering.ComputeProportions = false;
+            bagOfVisualWords.Clustering.ComputeError = false;
+
+            bagOfVisualWords.Learn(originalTrainImages.Values.ToArray());
+
+#endif
 
             sw1.Stop();
 
             Stopwatch sw2 = Stopwatch.StartNew();
+ 
 
             foreach (ListViewItem item in listView1.Items)
             {
                 Bitmap image = originalImages[item.ImageKey] as Bitmap;
 
-                double[] featureVector = (bow as ITransform<Bitmap, double[]>).Transform(image);
+                //double[] featureVector = (bagOfVisualWords as ITransform<Bitmap, double[]>).Transform(image);
 
-                string featureString = featureVector.ToString(DefaultArrayFormatProvider.InvariantCulture);
+                double[] featureVector = (bagOfVisualWords as ITransform<Bitmap, double[]>).Transform(image);
+
+               /* string featureString = featureVector.ToString(DefaultArrayFormatProvider.InvariantCulture);
 
                 if (item.SubItems.Count == 2)
                     item.SubItems[1].Text = featureString;
                 else item.SubItems.Add(featureString);
+                */
 
                 int classLabel = (item.Tag as Tuple<double[], int>).Item2;
 
@@ -257,9 +288,15 @@ namespace Test
 
             var teacher = new OneclassSupportVectorLearning<IKernel>()
             {
-                Kernel = kernel,
-                Nu = 0.9
+                Kernel = new Gaussian(0.9),
+                Nu = 0.1
             };
+
+            /*
+            var teacher = new SequentialMinimalOptimization<Gaussian>()
+            {
+                Complexity = 100
+            };*/
 
             double[][] inputs;
             int[] outputs;
@@ -277,14 +314,7 @@ namespace Test
 
         
         private void buttonClassify_Click(object sender, EventArgs e)
-        {
-            int trainingHits = 0;
-            int trainingMiss = 0;
-
-            int testingHits = 0;
-            int testingMiss = 0;
-
-            
+        {            
             foreach (ListViewGroup group in listView1.Groups)
             {
 
@@ -305,24 +335,14 @@ namespace Test
                     if (expected == actual)
                     {
                         
-                        item.BackColor = Color.LightGreen;
-                        if (item.Group.Name.EndsWith(".train"))
-                            trainingHits++;
-                        else testingHits++;
+                        item.BackColor = Color.Aquamarine;
                     }
                     else
                     {
-                        item.BackColor = Color.Firebrick;
-                        if (item.Group.Name.EndsWith(".train"))
-                            trainingMiss++;
-                        else testingMiss++;
+                        item.BackColor = Color.DarkRed;
                     }
                 }
             }
-
-            int trainingTotal = trainingHits + trainingMiss;
-            int testingTotal = testingHits + testingMiss;
-
         }
 
         private void getData(out double[][] inputs, out int[] outputs)
