@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatternRecognition", "PatternRecognition\PatternRecognition.csproj", "{9AB30D50-1929-4CA8-9CA0-F92897355EDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acord.Vision.Correct", "Acord.Vision.Correct\Acord.Vision.Correct.csproj", "{16436B9A-D2B6-43A7-A9DC-B7A2C9A8BDAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9AB30D50-1929-4CA8-9CA0-F92897355EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AB30D50-1929-4CA8-9CA0-F92897355EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AB30D50-1929-4CA8-9CA0-F92897355EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16436B9A-D2B6-43A7-A9DC-B7A2C9A8BDAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16436B9A-D2B6-43A7-A9DC-B7A2C9A8BDAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16436B9A-D2B6-43A7-A9DC-B7A2C9A8BDAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16436B9A-D2B6-43A7-A9DC-B7A2C9A8BDAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

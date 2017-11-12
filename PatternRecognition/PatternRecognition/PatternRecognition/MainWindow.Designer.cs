@@ -31,24 +31,20 @@ namespace Test
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lbStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
-            this.listView1 = new System.Windows.Forms.ListView();
             this.buttonClassify = new System.Windows.Forms.Button();
-            this.buttonTrainning = new System.Windows.Forms.Button();
-            this.buttonComputeBVW = new System.Windows.Forms.Button();
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            //this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changePassToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.computeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.buttonCompute = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -56,11 +52,12 @@ namespace Test
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
-            this.toolStripMenuItem6});
+            this.toolStripMenuItem6,
+            this.toolsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1214, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(624, 25);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -75,122 +72,102 @@ namespace Test
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(92, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem5.Text = "E&xit";
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
             // 
             // toolStripMenuItem6
             // 
+            this.toolStripMenuItem6.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem,
+            this.changePassToolStripMenuItem});
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
             this.toolStripMenuItem6.Size = new System.Drawing.Size(44, 19);
             this.toolStripMenuItem6.Text = "&Help";
             // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lbStatus,
-            this.progressBar});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 719);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1214, 22);
-            this.statusStrip1.TabIndex = 18;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lbStatus
-            // 
-            this.lbStatus.Name = "lbStatus";
-            this.lbStatus.Size = new System.Drawing.Size(1191, 17);
-            this.lbStatus.Spring = true;
-            this.lbStatus.Text = "Click \"Compute bag-of-words\" to begin (it could take a while)!";
-            this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // progressBar
-            // 
-            this.progressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(150, 24);
-            this.progressBar.Visible = false;
-            // 
-            // listView1
-            // 
-            this.listView1.Location = new System.Drawing.Point(0, 147);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(895, 569);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            // 
             // buttonClassify
             // 
-            this.buttonClassify.Location = new System.Drawing.Point(901, 147);
+            this.buttonClassify.Location = new System.Drawing.Point(146, 28);
             this.buttonClassify.Name = "buttonClassify";
             this.buttonClassify.Size = new System.Drawing.Size(301, 48);
             this.buttonClassify.TabIndex = 20;
             this.buttonClassify.Text = "Classify";
             this.buttonClassify.UseVisualStyleBackColor = true;
+            this.buttonClassify.Visible = false;
             this.buttonClassify.Click += new System.EventHandler(this.buttonClassify_Click);
             // 
-            // buttonTrainning
+            // pictureBox1
             // 
-            this.buttonTrainning.Location = new System.Drawing.Point(901, 88);
-            this.buttonTrainning.Name = "buttonTrainning";
-            this.buttonTrainning.Size = new System.Drawing.Size(301, 53);
-            this.buttonTrainning.TabIndex = 21;
-            this.buttonTrainning.Text = "Trainning";
-            this.buttonTrainning.UseVisualStyleBackColor = true;
-            this.buttonTrainning.Click += new System.EventHandler(this.buttonTrainning_Click);
+            this.pictureBox1.Location = new System.Drawing.Point(173, 82);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(256, 256);
+            this.pictureBox1.TabIndex = 21;
+            this.pictureBox1.TabStop = false;
             // 
-            // buttonComputeBVW
+            // button1
             // 
-            this.buttonComputeBVW.Location = new System.Drawing.Point(901, 28);
-            this.buttonComputeBVW.Name = "buttonComputeBVW";
-            this.buttonComputeBVW.Size = new System.Drawing.Size(301, 54);
-            this.buttonComputeBVW.TabIndex = 22;
-            this.buttonComputeBVW.Text = "Compute BVW";
-            this.buttonComputeBVW.UseVisualStyleBackColor = true;
-            this.buttonComputeBVW.Click += new System.EventHandler(this.buttonComputeBVW_Click);
+            this.button1.Location = new System.Drawing.Point(173, 344);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(256, 23);
+            this.button1.TabIndex = 22;
+            this.button1.Text = "Upload Image";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // imageList
+            // aboutToolStripMenuItem
             // 
-            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Text = "About";
             // 
-            // comboBox1
+            // changePassToolStripMenuItem
             // 
-            this.comboBox1.Location = new System.Drawing.Point(13, 29);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
-            this.comboBox1.TabIndex = 23;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.changePassToolStripMenuItem.Name = "changePassToolStripMenuItem";
+            this.changePassToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.changePassToolStripMenuItem.Text = "Change Pass";
             // 
-            // progressBar1
+            // toolsToolStripMenuItem
             // 
-            this.progressBar1.Location = new System.Drawing.Point(13, 118);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(865, 23);
-            this.progressBar1.TabIndex = 24;
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.computeToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 19);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // computeToolStripMenuItem
+            // 
+            this.computeToolStripMenuItem.Name = "computeToolStripMenuItem";
+            this.computeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.computeToolStripMenuItem.Text = "Compute";
+            this.computeToolStripMenuItem.Click += new System.EventHandler(this.computeToolStripMenuItem_Click);
+            // 
+            // buttonCompute
+            // 
+            this.buttonCompute.Location = new System.Drawing.Point(478, 315);
+            this.buttonCompute.Name = "buttonCompute";
+            this.buttonCompute.Size = new System.Drawing.Size(115, 23);
+            this.buttonCompute.TabIndex = 23;
+            this.buttonCompute.Text = "ComputeBCF";
+            this.buttonCompute.UseVisualStyleBackColor = true;
+            this.buttonCompute.Visible = false;
+            this.buttonCompute.Click += new System.EventHandler(this.buttonCompute_Click);
             // 
             // MainWindow
             // 
-            this.ClientSize = new System.Drawing.Size(1214, 741);
-            this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.buttonComputeBVW);
-            this.Controls.Add(this.buttonTrainning);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(624, 421);
+            this.Controls.Add(this.buttonCompute);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.buttonClassify);
-            this.Controls.Add(this.listView1);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.statusStrip1);
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(22, 766);
+            this.MinimumSize = new System.Drawing.Size(22, 300);
             this.Name = "MainWindow";
             this.Text = "Image classification with BVW";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -201,18 +178,16 @@ namespace Test
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lbStatus;
-        private System.Windows.Forms.ToolStripProgressBar progressBar;
         private SizeF AutoScaleDimensions;
         private AutoScaleMode AutoScaleMode;
-        private ListView listView1;
         private Button buttonClassify;
-        private Button buttonTrainning;
-        private Button buttonComputeBVW;
-        private ImageList imageList;
-        private ComboBox comboBox1;
-        private ProgressBar progressBar1;
+        private PictureBox pictureBox1;
+        private Button button1;
+        private ToolStripMenuItem aboutToolStripMenuItem;
+        private ToolStripMenuItem changePassToolStripMenuItem;
+        private ToolStripMenuItem toolsToolStripMenuItem;
+        private ToolStripMenuItem computeToolStripMenuItem;
+        private Button buttonCompute;
     }
 }
 

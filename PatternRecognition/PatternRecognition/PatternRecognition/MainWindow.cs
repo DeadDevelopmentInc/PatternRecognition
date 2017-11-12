@@ -1,10 +1,4 @@
-﻿//#define MulticlassSVM
-#define OneclassSVM
-//#define SURF
-#define HOG
-//#define BackgroundWorker
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -25,355 +19,203 @@ using Accord.Math.Optimization.Losses;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Text;
+using System.Collections;
 
 namespace Test
 {
     
     public partial class MainWindow : Form
     {
+        double[][] inputsInfo = new double[19000][];
+        int[] outputResult;
 
-        Dictionary<string, Bitmap> originalTrainImages;
-        Dictionary<string, Bitmap> originalTestImages;
-
-        Dictionary<string, Bitmap> originalImages;
-        Dictionary<string, Bitmap> displayImages;
-
-        bool fl = false;
-
-
-#if (BackgroundWorker)
-        System.ComponentModel.BackgroundWorker backgroundWorker;
-#endif
-
-
-#if (MulticlassSVM)
+        bool adminIn = false;
+                
         MulticlassSupportVectorMachine<IKernel> multiSVM;
-#endif
 
-#if (OneclassSVM)
-        SupportVectorMachine<IKernel> oneSVM;
-#endif 
-        
+        OpenFileDialog openFileDialog = new OpenFileDialog();
+
+        IBagOfWords<Bitmap> bow;
+        private Dictionary<string, Bitmap> originalTestImages;
+        private Dictionary<string, Bitmap> originalTrainImages;
 
         public MainWindow()
         {
             InitializeComponent();
 
-#if (BackgroundWorker)
+            openFileDialog.DefaultExt = ".tif";
+            openFileDialog.Title = "Open Image";
+            openFileDialog.Filter = "JPEG files (*.jpg)|*.jpg";
 
-            backgroundWorker.DoWork +=
-                backgroundWorker_DoWork(EventArgs e);
-
-#endif
-
+            for(int i =0; i < inputsInfo.Length; i++)
+            {
+                inputsInfo[i] = new double[240];
+            }
         }
-
-
-
-#if (BackgroundWorker)
-
-        private backgroundWorker_DoWork(EventArgs e)
-        {
-
-        }
-
-#endif
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            var path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources"));
+            var path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Txt"));
 
-            foreach (DirectoryInfo classFolder in path.EnumerateDirectories())
-            {
-                comboBox1.Items.Add(classFolder.Name);
-            }
-        }
-
-        private void UploadImageFromFolder(DirectoryInfo directory ,EventArgs e)
-        {
-            listView1.Clear();
             
-            if(fl)
-            {
-                originalImages.Clear();
-                displayImages.Clear();
-                originalTestImages.Clear();
-                originalTrainImages.Clear();
 
+            ArrayList list = new ArrayList();
+
+            foreach(FileInfo file in path.GetFiles())
+            {
+                list.Add(File.ReadAllLines(file.FullName.ToString()).Take(100).ToArray());
             }
 
-            fl = true;
-            //Accord.Math.Random.Generator.Seed = 1;
-
-            originalImages = new Dictionary<string, Bitmap>();
-            displayImages = new Dictionary<string, Bitmap>();
-
-            originalTestImages = new Dictionary<string, Bitmap>();
-            originalTrainImages = new Dictionary<string, Bitmap>();
-
-            ImageList imageList = new ImageList();
-            imageList.ImageSize = new Size(64, 64);
-            imageList.ColorDepth = ColorDepth.Depth8Bit;
-            listView1.LargeImageList = imageList;
-
-            int currentClassLabel = 0;
-
-
-            string name = directory.Name;
-
-
-            ListViewGroup trainingGroup = listView1.Groups.Add(name + ".train", name + ".train");
-            ListViewGroup testingGroup = listView1.Groups.Add(name + ".test", name + ".test");
-
-
-            FileInfo[] files = GetFilesByExtensions(directory, ".jpg", ".tif").ToArray();
-
-
-            Vector.Shuffle(files);
-
-
-            for (int i = 0; i < files.Length; i++)
+            int k = 0;
+            int m = 0;
+            for(int p = 0; p < list.Count; p++)
             {
-                FileInfo file = files[i];
-
-                Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
-
-                string shortName = file.Name;
-                string imageKey = file.FullName;
-
-                imageList.Images.Add(imageKey, image);
-                originalImages.Add(imageKey, image);
-                displayImages.Add(imageKey, image);
-
-                ListViewItem item;
-                if ((i / (double)files.Length) < 0.7)
+                string[] lines = (string[])list[p];
+                for (int i = 0; i < lines.Length; i++)
                 {
-
-                    item = new ListViewItem(trainingGroup);
-                    originalTrainImages.Add(imageKey, image);
-                    item.Text = directory.Name + "." + i.ToString() + ".train";
-
+                    m = 0;
+                    double[] row = lines[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(double.Parse).ToArray();
+                    for(int j=0; j < row.Length; j++)
+                    {
+                        inputsInfo[k][m] = row[j];
+                        m++;
+                    }
                 }
-                else
-                {
-
-                    item = new ListViewItem(testingGroup);
-                    originalTestImages.Add(imageKey, image);
-                    item.Text = directory.Name + "." + i.ToString() + ".test";
-
-                }
-
-                item.ImageKey = imageKey;
-                item.Name = shortName;
-
-                item.Tag = new Tuple<double[], int>(null, currentClassLabel);
-
-                listView1.Items.Add(item);
-            }
-        }
-
-        
-        private void buttonComputeBVW_Click(object sender, EventArgs e)
-        {
-            int numberOfWords = 64;
-
-            /*progressBar.Minimum = 0;
-
-            progressBar.Maximum = listView1.Items.Count;
-
-            progressBar.Step = 1;*/
-            
-            Stopwatch sw1 = Stopwatch.StartNew();
-
-#if (SURF)
-
-            IBagOfWords<Bitmap> bagOfVisualWords;
-            
-            BinarySplit binarySplit = new BinarySplit(numberOfWords);
-
-            BagOfVisualWords surfbagOfVisualWords = new BagOfVisualWords(binarySplit);
-
-            bagOfVisualWords = surfbagOfVisualWords.Learn(originalTrainImages.Values.ToArray());
-
-#elif (HOG)
-
-            var bagOfVisualWords = BagOfVisualWords.Create(new LocalBinaryPattern(), new BinarySplit(numberOfWords));
-
-            bagOfVisualWords.Clustering.ComputeCovariances = false;
-            bagOfVisualWords.Clustering.ComputeProportions = false;
-            bagOfVisualWords.Clustering.ComputeError = false;
-
-            bagOfVisualWords.Learn(originalTrainImages.Values.ToArray());
-
-#endif
-
-            sw1.Stop();
-
-            Stopwatch sw2 = Stopwatch.StartNew();
- 
-
-            foreach (ListViewItem item in listView1.Items)
-            {
-                Bitmap image = originalImages[item.ImageKey] as Bitmap;
-
-                //double[] featureVector = (bagOfVisualWords as ITransform<Bitmap, double[]>).Transform(image);
-
-                double[] featureVector = (bagOfVisualWords as ITransform<Bitmap, double[]>).Transform(image);
-
-               /* string featureString = featureVector.ToString(DefaultArrayFormatProvider.InvariantCulture);
-
-                if (item.SubItems.Count == 2)
-                    item.SubItems[1].Text = featureString;
-                else item.SubItems.Add(featureString);
-                */
-
-                int classLabel = (item.Tag as Tuple<double[], int>).Item2;
-
-                item.Tag = Tuple.Create(featureVector, classLabel);
-
-
+                k++;
             }
 
-            sw2.Stop();
-
-        }
-
-
-        private void buttonTrainning_Click(object sender, EventArgs e)
-        {
-
-#if (MulticlassSVM)
-
-            IKernel kernel = getKernel();
-
-          
-            double complexity = 1;
-            double tolerance = 0.01;
-            int cacheSize = 1024;
-
-            
             var teacher = new MulticlassSupportVectorLearning<IKernel>()
             {
-                Kernel = kernel,
+                
                 Learner = (param) =>
                 {
                     return new SequentialMinimalOptimization<IKernel>()
                     {
-                        Kernel = kernel,
-                        Complexity = complexity,
-                        Tolerance = tolerance,
-                        CacheSize = cacheSize,
+                        Kernel = new HistogramIntersection(0.25, 1),
+                        UseComplexityHeuristic = true,
+                        Tolerance = 0.001,
+                        CacheSize = 2048,
                     };
                 }
             };
 
-            double[][] inputs;
-            int[] outputs;
-            getData(out inputs, out outputs);
+            // Get the input and output data
+
             
-            lbStatus.Text = "Training the classifiers. This may take a (very) significant amount of time...";
-            Application.DoEvents();
-
-            Stopwatch sw = Stopwatch.StartNew();
             
-            this.multiSVM = teacher.Learn(inputs, outputs);
 
-            sw.Stop();
-#endif
-
-#if (OneclassSVM)
-            IKernel kernel = getKernel();
-
-            var teacher = new OneclassSupportVectorLearning<IKernel>()
-            {
-                Kernel = new Gaussian(0.9),
-                Nu = 0.1
-            };
-
-            /*
-            var teacher = new SequentialMinimalOptimization<Gaussian>()
-            {
-                Complexity = 100
-            };*/
-
-            double[][] inputs;
-            int[] outputs;
-            getData(out inputs, out outputs);
-            lbStatus.Text = "Training the classifiers. This may take a (very) significant amount of time...";
-            Application.DoEvents();
-
-            Stopwatch sw = Stopwatch.StartNew();
-
-            this.oneSVM = teacher.Learn(inputs);
-
-            sw.Stop();
-#endif           
+            // Train the machines. It should take a while.
+            //this.multiSVM = teacher.Learn(inputsInfo, outputResult);
         }
 
-        
-        private void buttonClassify_Click(object sender, EventArgs e)
-        {            
-            foreach (ListViewGroup group in listView1.Groups)
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+
+            Properties.Settings.Default.Save();
+            Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-
-                foreach (ListViewItem item in group.Items)
+                try
                 {
-                    var info = item.Tag as Tuple<double[], int>;
-                    double[] input = info.Item1;
-                    int expected = info.Item2;
-
-#if (MulticlassSVM)
-                    int actual = multiSVM.Decide(input);
-#endif
-
-#if (OneclassSVM)
-                    int actual = Convert.ToInt32(oneSVM.Decide(input));
-#endif
-
-                    if (expected == actual)
+                    if (openFileDialog.OpenFile() != null)
                     {
-                        
-                        item.BackColor = Color.Aquamarine;
+                        pictureBox1.Image = new Bitmap(openFileDialog.OpenFile());
+
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                }
+            }
+
+            buttonClassify.Visible = true;
+        }
+
+        private void buttonClassify_Click(object sender, EventArgs e)
+        {
+            Bitmap image = new Bitmap(pictureBox1.Image);
+            
+            double[] featureVector = ( Properties.Settings.Default.bagOfVisualWords
+                as ITransform<Bitmap, double[]>).Transform(image);
+
+            int a = this.multiSVM.Decide(featureVector);
+        }
+
+        private void computeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Compute form = new Compute();
+            form.ShowDialog();
+            if(form.GetPass())
+            {
+                buttonCompute.Visible = true;
+            }
+            
+        }
+
+        private void cop()
+        {
+
+        }
+
+        private void buttonCompute_Click(object sender, EventArgs e)
+        {
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Res"));
+
+
+            originalTestImages = new Dictionary<string, Bitmap>();
+            originalTrainImages = new Dictionary<string, Bitmap>();
+
+            foreach (DirectoryInfo classFolder in path.EnumerateDirectories())
+            {
+                string name = classFolder.Name;
+
+                FileInfo[] files = GetFilesByExtensions(classFolder, ".jpg", ".tif").ToArray();
+
+                Vector.Shuffle(files);
+
+                for (int i = 0; i < files.Length; i++)
+                {
+                    FileInfo file = files[i];
+
+                    Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
+
+                    string shortName = file.Name;
+                    string imageKey = file.FullName;
+
+                    if ((i / (double)files.Length) < 0.7)
+                    {
+                        originalTrainImages.Add(imageKey, image);
                     }
                     else
                     {
-                        item.BackColor = Color.DarkRed;
-                    }
-                }
-            }
-        }
-
-        private void getData(out double[][] inputs, out int[] outputs)
-        {
-            List<double[]> inputList = new List<double[]>();
-            List<int> outputList = new List<int>();
-
-            foreach (ListViewGroup group in listView1.Groups)
-            {
-                if (group.Name.EndsWith(".train"))
-                {
-                    foreach (ListViewItem item in group.Items)
-                    {
-                        var info = item.Tag as Tuple<double[], int>;
-                        inputList.Add(info.Item1);
-                        outputList.Add(info.Item2);
+                        originalTestImages.Add(imageKey, image);
                     }
                 }
             }
 
-            inputs = inputList.ToArray();
-            outputs = outputList.ToArray();
-        }
+            BinarySplit binarySplit = new BinarySplit(240);
 
-        private IKernel getKernel()
-        {
-           return new HistogramIntersection(1, 1);
+            var hog = new HistogramsOfOrientedGradientsCorrect();
 
-            throw new Exception();
+            var hogBow = BagOfVisualWords.Create(hog, binarySplit);
+
+            //var hogBow = NewBagOfWords.Create(hog, binarySplit);
+            
+            hogBow.Learn(originalTrainImages.Values.ToArray());
+
+            BinarySave.WriteBinary(bagOfVisualWords: hogBow);
+
+            var HOGBOW = BinarySave.ReadBinary();
         }
-        
 
         public static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, params string[] extensions)
         {
@@ -381,18 +223,6 @@ namespace Test
                 throw new ArgumentNullException("extensions");
             IEnumerable<FileInfo> files = dir.EnumerateFiles();
             return files.Where(f => extensions.Contains(f.Extension));
-        }
-        
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            DirectoryInfo directory = new DirectoryInfo(Path.Combine(Application.StartupPath,
-                "Resources", comboBox1.SelectedItem.ToString()));
-            UploadImageFromFolder(directory, e);
         }
     }
 }
