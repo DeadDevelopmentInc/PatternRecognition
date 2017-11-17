@@ -102,3 +102,4 @@ D:\repos\PatternRecognition\PatternRecognition\PatternRecognition\PatternRecogni
 D:\repos\PatternRecognition\PatternRecognition\PatternRecognition\PatternRecognition\obj\Debug\Test.exe
 D:\repos\PatternRecognition\PatternRecognition\PatternRecognition\PatternRecognition\obj\Debug\Test.pdb
 D:\repos\PatternRecognition\PatternRecognition\PatternRecognition\PatternRecognition\obj\Debug\Test.Compute.resources
+D:\repos\PatternRecognition\PatternRecognition\PatternRecognition\PatternRecognition\obj\Debug\Test.ChangePass.resources

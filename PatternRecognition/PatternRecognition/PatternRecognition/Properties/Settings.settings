@@ -2,11 +2,17 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Test.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="bagOfVisualWords" Type="Accord.MachineLearning.BagOfWords" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="Password" Type="System.String" Scope="User">
       <Value Profile="(Default)">3m2BapEkLys</Value>
+    </Setting>
+    <Setting Name="recognTrue" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="recognFalse" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="recordNum" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -25,17 +25,6 @@ namespace Test.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::Accord.MachineLearning.BagOfWords bagOfVisualWords {
-            get {
-                return ((global::Accord.MachineLearning.BagOfWords)(this["bagOfVisualWords"]));
-            }
-            set {
-                this["bagOfVisualWords"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("3m2BapEkLys")]
         public string Password {
             get {
@@ -43,6 +32,42 @@ namespace Test.Properties {
             }
             set {
                 this["Password"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int recognTrue {
+            get {
+                return ((int)(this["recognTrue"]));
+            }
+            set {
+                this["recognTrue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int recognFalse {
+            get {
+                return ((int)(this["recognFalse"]));
+            }
+            set {
+                this["recognFalse"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int recordNum {
+            get {
+                return ((int)(this["recordNum"]));
+            }
+            set {
+                this["recordNum"] = value;
             }
         }
     }

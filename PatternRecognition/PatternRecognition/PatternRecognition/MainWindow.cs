@@ -21,24 +21,27 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Text;
 using System.Collections;
+using Accord.Imaging.Filters;
 
 namespace Test
 {
     
     public partial class MainWindow : Form
     {
-        double[][] inputsInfo = new double[19000][];
-        int[] outputResult;
+        private int numberofwords = 124;
+        private const int V = 280;
+        SortedList<int, string> Animals = new SortedList<int, string>();
 
-        bool adminIn = false;
+        double[][] inputsInfo = new double[V][];
+        int[] outputResult = new int[V];
                 
         MulticlassSupportVectorMachine<IKernel> multiSVM;
 
         OpenFileDialog openFileDialog = new OpenFileDialog();
-
+        
         IBagOfWords<Bitmap> bow;
-        private Dictionary<string, Bitmap> originalTestImages;
-        private Dictionary<string, Bitmap> originalTrainImages;
+
+        private Dictionary<int, Bitmap> originalTrainImages;
 
         public MainWindow()
         {
@@ -46,80 +49,52 @@ namespace Test
 
             openFileDialog.DefaultExt = ".tif";
             openFileDialog.Title = "Open Image";
-            openFileDialog.Filter = "JPEG files (*.jpg)|*.jpg";
+            openFileDialog.Filter = "JPEG files (*.jpg)|*.jpg |TIFF files (*.tif)| *.tif|" +
+                " All files | *.*";
 
-            for(int i =0; i < inputsInfo.Length; i++)
-            {
-                inputsInfo[i] = new double[240];
-            }
-        }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
+            labelCorrect.Visible = false;
+            buttonCorrectYes.Visible = false;
+            buttonCorrectYes.Visible = false;
+            this.BackColor = Color.White;
 
-            var path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Txt"));
+            Animals.Add(0, "Butterflys");
+            Animals.Add(1, "Cow");
+            Animals.Add(2, "Monkey");
+            Animals.Add(3, "Spider");
 
-            
+            /*Animals.Add(0, "Bird");
+            Animals.Add(1, "Butterflys");
+            Animals.Add(2, "Cow");
+            Animals.Add(3, "Crocodile");
+            Animals.Add(4, "Deer");
+            Animals.Add(5, "Dog");
+            Animals.Add(6, "Dolphine ");
+            Animals.Add(7, "Duck");
+            Animals.Add(8, "Elephant");
+            Animals.Add(9, "Fish");
+            Animals.Add(10, "Flyingbird");
+            Animals.Add(11, "Hen");
+            Animals.Add(12, "Horse");
+            Animals.Add(13, "Leopard");
+            Animals.Add(14, "Monkey");
+            Animals.Add(15, "Rabbit");
+            Animals.Add(16, "Rat");
+            Animals.Add(17, "Spider");
+            Animals.Add(18, "Tortoise");*/
 
-            ArrayList list = new ArrayList();
+            multiSVM = BinarySave.ReadBinary(true);
 
-            foreach(FileInfo file in path.GetFiles())
-            {
-                list.Add(File.ReadAllLines(file.FullName.ToString()).Take(100).ToArray());
-            }
-
-            int k = 0;
-            int m = 0;
-            for(int p = 0; p < list.Count; p++)
-            {
-                string[] lines = (string[])list[p];
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    m = 0;
-                    double[] row = lines[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(double.Parse).ToArray();
-                    for(int j=0; j < row.Length; j++)
-                    {
-                        inputsInfo[k][m] = row[j];
-                        m++;
-                    }
-                }
-                k++;
-            }
-
-            var teacher = new MulticlassSupportVectorLearning<IKernel>()
-            {
-                
-                Learner = (param) =>
-                {
-                    return new SequentialMinimalOptimization<IKernel>()
-                    {
-                        Kernel = new HistogramIntersection(0.25, 1),
-                        UseComplexityHeuristic = true,
-                        Tolerance = 0.001,
-                        CacheSize = 2048,
-                    };
-                }
-            };
-
-            // Get the input and output data
-
-            
-            
-
-            // Train the machines. It should take a while.
-            //this.multiSVM = teacher.Learn(inputsInfo, outputResult);
-        }
-
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-
-            Properties.Settings.Default.Save();
-            Close();
+            bow = BinarySave.ReadBinary();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            labelCorrect.Visible = false;
+            buttonCorrectYes.Visible = false;
+            buttonCorrectNo.Visible = false;
+            this.BackColor = Color.White;
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -142,37 +117,54 @@ namespace Test
 
         private void buttonClassify_Click(object sender, EventArgs e)
         {
-            Bitmap image = new Bitmap(pictureBox1.Image);
-            
-            double[] featureVector = ( Properties.Settings.Default.bagOfVisualWords
-                as ITransform<Bitmap, double[]>).Transform(image);
+            Bitmap image = (Bitmap)(pictureBox1.Image);
+
+            CannyEdgeDetector filterCanny = new CannyEdgeDetector();
+
+            filterCanny.ApplyInPlace(image);
+
+            double[] featureVector = (bow as ITransform<Bitmap, double[]>).Transform(image);
 
             int a = this.multiSVM.Decide(featureVector);
+
+            string animal = GetAnimalClass(a);
+
+            label2.Text = "This is: " + animal + "?";
+
+            labelCorrect.Visible = true;
+            buttonCorrectYes.Visible = true;
+            buttonCorrectNo.Visible = true;
         }
 
-        private void computeToolStripMenuItem_Click(object sender, EventArgs e)
+        private string GetAnimalClass(int i)
         {
-            Compute form = new Compute();
-            form.ShowDialog();
-            if(form.GetPass())
+            foreach(KeyValuePair<int, string> kvp in Animals)
             {
-                buttonCompute.Visible = true;
+                if (i == kvp.Key)
+                    return kvp.Value;
+
             }
-            
+            return "Coincidence not found";
         }
 
-        private void cop()
+        public static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, 
+            params string[] extensions)
         {
-
+            if (extensions == null)
+                throw new ArgumentNullException("extensions");
+            IEnumerable<FileInfo> files = dir.EnumerateFiles();
+            return files.Where(f => extensions.Contains(f.Extension));
         }
 
         private void buttonCompute_Click(object sender, EventArgs e)
         {
             DirectoryInfo path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Res"));
+            
+            originalTrainImages = new Dictionary<int, Bitmap>();
 
+            int j = 0;
 
-            originalTestImages = new Dictionary<string, Bitmap>();
-            originalTrainImages = new Dictionary<string, Bitmap>();
+            int k = 0;
 
             foreach (DirectoryInfo classFolder in path.EnumerateDirectories())
             {
@@ -181,48 +173,133 @@ namespace Test
                 FileInfo[] files = GetFilesByExtensions(classFolder, ".jpg", ".tif").ToArray();
 
                 Vector.Shuffle(files);
-
                 for (int i = 0; i < files.Length; i++)
                 {
                     FileInfo file = files[i];
 
                     Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
 
+                    CannyEdgeDetector filterCanny = new CannyEdgeDetector();
+
+                    filterCanny.ApplyInPlace(image);
+
                     string shortName = file.Name;
-                    string imageKey = file.FullName;
+                    int imageKey = j;
 
                     if ((i / (double)files.Length) < 0.7)
                     {
-                        originalTrainImages.Add(imageKey, image);
-                    }
-                    else
-                    {
-                        originalTestImages.Add(imageKey, image);
+                        originalTrainImages.Add(j, image);
+                        outputResult[j] = k;
+                        j++;
                     }
                 }
+
+                k++;
             }
 
-            BinarySplit binarySplit = new BinarySplit(240);
 
-            var hog = new HistogramsOfOrientedGradientsCorrect();
+            var teacher = new MulticlassSupportVectorLearning<IKernel>()
+            {
 
-            var hogBow = BagOfVisualWords.Create(hog, binarySplit);
+                Learner = (param) =>
+                {
+                    return new SequentialMinimalOptimization<IKernel>()
+                    {
+                        Kernel = new Gaussian(0.25),
+                        //Complexity = 400,
+                        UseComplexityHeuristic = true,
+                        Tolerance = 0.001,
+                        CacheSize = 2048,
+                        UseKernelEstimation = true,
+                    };
+                }
+            };
 
-            //var hogBow = NewBagOfWords.Create(hog, binarySplit);
+            var kmodes = new KModes<byte>(numberofwords, new Hamming());
+            var detector = new FastRetinaKeypointDetector();
+
+            // Create bag-of-words (BoW) with the given algorithm
+            var surf = new BagOfVisualWords<FastRetinaKeypoint, byte[]>(detector, kmodes);
             
-            hogBow.Learn(originalTrainImages.Values.ToArray());
+            //var freakBow = new BagOfVisualWords<FastRetinaKeypoint, byte[]>(detector, kmodes);
 
-            BinarySave.WriteBinary(bagOfVisualWords: hogBow);
+            // Compute the BoW codebook using training images only
+            surf.Learn(originalTrainImages.Values.ToArray());
 
-            var HOGBOW = BinarySave.ReadBinary();
+            bow = surf;
+            
+
+            for (int i = 0; i < originalTrainImages.Count; i++)
+            {
+                Bitmap image = originalTrainImages[i] as Bitmap;
+
+                inputsInfo[i] = (bow as ITransform<Bitmap, double[]>).Transform(image);
+            }
+
+            BinarySave.WriteBinary(surf);
+
+            multiSVM = teacher.Learn(inputsInfo, outputResult);
+
+            BinarySave.WriteBinary(multiSVM);
+
+
         }
 
-        public static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, params string[] extensions)
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
         {
-            if (extensions == null)
-                throw new ArgumentNullException("extensions");
-            IEnumerable<FileInfo> files = dir.EnumerateFiles();
-            return files.Where(f => extensions.Contains(f.Extension));
+
+            Properties.Settings.Default.Save();
+            Close();
+        }
+
+        private void buttonCorrectYes_Click(object sender, EventArgs e)
+        {
+            this.BackColor = Color.Green;
+            Properties.Settings.Default.recognTrue += 1;
+            Properties.Settings.Default.Save();
+            Properties.Settings.Default.recordNum += 1;
+            Properties.Settings.Default.Save();
+            labelCorrect.Visible = false;
+            buttonCorrectYes.Visible = false;
+            buttonCorrectNo.Visible = false;
+            label2.Text = "Please, upload new image";
+        }
+
+        private void buttonCorrectNo_Click(object sender, EventArgs e)
+        {
+            this.BackColor = Color.Red;
+            Properties.Settings.Default.recognFalse += 1;
+            Properties.Settings.Default.Save();
+            Properties.Settings.Default.recordNum += 1;
+            Properties.Settings.Default.Save();
+            labelCorrect.Visible = false;
+            buttonCorrectYes.Visible = false;
+            buttonCorrectNo.Visible = false;
+            label2.Text = "Please, upload new image";
+        }
+
+        private void changePassToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChangePass form = new ChangePass();
+            form.ShowDialog();
+            
+        }
+
+        private void computeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Compute form = new Compute();
+            form.ShowDialog();
+            if (form.GetPass())
+            {
+                buttonCompute.Visible = true;
+            }
+
+        }
+
+        private void averageRecordResToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(((double)Properties.Settings.Default.recognTrue
+                / (double)Properties.Settings.Default.recordNum * 100).ToString());
         }
     }
 }

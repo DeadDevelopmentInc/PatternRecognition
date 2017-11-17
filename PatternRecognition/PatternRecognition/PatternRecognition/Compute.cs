@@ -26,9 +26,7 @@ namespace Test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string password;
-
-            password = textBox1.Text;
+            string password = textBox1.Text;
 
             if (password == null)
             {

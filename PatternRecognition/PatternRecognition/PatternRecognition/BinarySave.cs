@@ -1,6 +1,8 @@
 ﻿using Accord;
 using Accord.Imaging;
 using Accord.MachineLearning;
+using Accord.MachineLearning.VectorMachines;
+using Accord.Statistics.Kernels;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,7 +18,7 @@ namespace Test
 {
     class BinarySave
     {
-        internal static void WriteBinary(BagOfVisualWords<IFeatureDescriptor<double[]>, double[], BinarySplit, HistogramsOfOrientedGradientsCorrect> bagOfVisualWords)
+        internal static void WriteBinary(BagOfVisualWords<FastRetinaKeypoint, byte[]> bagOfVisualWords)
         {
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "hogBow.dat"), FileMode.OpenOrCreate);
@@ -31,18 +33,52 @@ namespace Test
             fs.Close();
         }
 
-        internal static BagOfVisualWords<IFeatureDescriptor<double[]>, double[], BinarySplit, HistogramsOfOrientedGradientsCorrect> ReadBinary()
+        internal static BagOfVisualWords<FastRetinaKeypoint, byte[]> ReadBinary()
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            
+
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "hogBow.dat"), FileMode.OpenOrCreate);
 
-            BagOfVisualWords<IFeatureDescriptor<double[]>, double[], BinarySplit, HistogramsOfOrientedGradientsCorrect> hogBow = 
-                (BagOfVisualWords<IFeatureDescriptor<double[]>, double[], BinarySplit, HistogramsOfOrientedGradientsCorrect>)formatter.Deserialize(fs);
+            BagOfVisualWords<FastRetinaKeypoint, byte[]> freak =
+                (BagOfVisualWords<FastRetinaKeypoint, byte[]>)formatter.Deserialize(fs);
 
-            return hogBow;
+            fs.Close();
+
+            return freak;
+        }
+
+        internal static void WriteBinary(MulticlassSupportVectorMachine<IKernel> multiclassSupportVectorLearning)
+        {
+            FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
+                "teacher.dat"), FileMode.OpenOrCreate);
+
+
+            BinaryFormatter formatter = new BinaryFormatter();
+
+
+            formatter.Serialize(fs, multiclassSupportVectorLearning);
+
+
+            fs.Close();
+        }
+
+        
+
+
+        internal static MulticlassSupportVectorMachine<IKernel> ReadBinary(bool log)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
+                "teacher.dat"), FileMode.OpenOrCreate);
+
+            MulticlassSupportVectorMachine<IKernel> multiclassSupportVectorLearning =
+                (MulticlassSupportVectorMachine<IKernel>)formatter.Deserialize(fs);
+
+            fs.Close();
+
+            return multiclassSupportVectorLearning;
         }
     }
 }
-//BagOfVisualWords<IFeatureDescriptor<double[]>, double[], BinarySplit, HistogramsOfOrientedGradients>
