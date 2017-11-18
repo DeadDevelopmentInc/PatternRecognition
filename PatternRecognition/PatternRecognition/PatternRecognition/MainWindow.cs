@@ -393,5 +393,15 @@ namespace PatternRecognition
             MessageBox.Show(((double)Properties.Settings.Default.recognTrue
                 / (double)Properties.Settings.Default.recordNum * 100).ToString());
         }
+
+        /// <summary>
+        /// Display information about programm and other information
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
