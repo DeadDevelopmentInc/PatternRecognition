@@ -23,7 +23,7 @@ using System.Text;
 using System.Collections;
 using Accord.Imaging.Filters;
 
-namespace Test
+namespace PatternRecognition
 {
     
     public partial class MainWindow : Form
