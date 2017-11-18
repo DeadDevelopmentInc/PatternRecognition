@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Test
+namespace PatternRecognition
 {
     public partial class ChangePass : Form
     {

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace Test
+namespace PatternRecognition
 {
     partial class MainWindow
     {
@@ -223,7 +223,7 @@ namespace Test
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(22, 300);
             this.Name = "MainWindow";
-            this.Text = "Image classification with BVW";
+            this.Text = "Image classification with BCF";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

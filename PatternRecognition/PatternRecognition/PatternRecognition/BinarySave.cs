@@ -14,14 +14,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Test
+namespace PatternRecognition
 {
     class BinarySave
     {
         internal static void WriteBinary(object bagOfVisualWords)
         {
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
-                "hogBow.dat"), FileMode.OpenOrCreate);
+                "bcf.dat"), FileMode.OpenOrCreate);
 
 
             BinaryFormatter formatter = new BinaryFormatter();
@@ -38,7 +38,7 @@ namespace Test
             BinaryFormatter formatter = new BinaryFormatter();
 
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
-                "hogBow.dat"), FileMode.OpenOrCreate);
+                "bcf.dat"), FileMode.OpenOrCreate);
 
             BagOfVisualWords freak =
                 (BagOfVisualWords)formatter.Deserialize(fs);
@@ -52,7 +52,7 @@ namespace Test
             multiclassSupportVectorLearning)
         {
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
-                "teacher.dat"), FileMode.OpenOrCreate);
+                "svm.dat"), FileMode.OpenOrCreate);
 
 
             BinaryFormatter formatter = new BinaryFormatter();
@@ -72,7 +72,7 @@ namespace Test
             BinaryFormatter formatter = new BinaryFormatter();
 
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
-                "teacher.dat"), FileMode.OpenOrCreate);
+                "svm.dat"), FileMode.OpenOrCreate);
 
             MulticlassSupportVectorMachine<HistogramIntersection> multiclassSupportVectorLearning =
                 (MulticlassSupportVectorMachine<HistogramIntersection>)formatter.Deserialize(fs);

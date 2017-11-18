@@ -1,4 +1,4 @@
-﻿namespace Test
+﻿namespace PatternRecognition
 {
     partial class Compute
     {
