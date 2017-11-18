@@ -18,7 +18,7 @@ namespace Test
 {
     class BinarySave
     {
-        internal static void WriteBinary(BagOfVisualWords<FastRetinaKeypoint, byte[]> bagOfVisualWords)
+        internal static void WriteBinary(object bagOfVisualWords)
         {
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "hogBow.dat"), FileMode.OpenOrCreate);
@@ -33,22 +33,23 @@ namespace Test
             fs.Close();
         }
 
-        internal static BagOfVisualWords<FastRetinaKeypoint, byte[]> ReadBinary()
+        internal static BagOfVisualWords ReadBinary()
         {
             BinaryFormatter formatter = new BinaryFormatter();
 
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "hogBow.dat"), FileMode.OpenOrCreate);
 
-            BagOfVisualWords<FastRetinaKeypoint, byte[]> freak =
-                (BagOfVisualWords<FastRetinaKeypoint, byte[]>)formatter.Deserialize(fs);
+            BagOfVisualWords freak =
+                (BagOfVisualWords)formatter.Deserialize(fs);
 
             fs.Close();
 
             return freak;
         }
 
-        internal static void WriteBinary(MulticlassSupportVectorMachine<IKernel> multiclassSupportVectorLearning)
+        internal static void WriteBinary(MulticlassSupportVectorMachine<HistogramIntersection>
+            multiclassSupportVectorLearning)
         {
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "teacher.dat"), FileMode.OpenOrCreate);
@@ -66,15 +67,15 @@ namespace Test
         
 
 
-        internal static MulticlassSupportVectorMachine<IKernel> ReadBinary(bool log)
+        internal static MulticlassSupportVectorMachine<HistogramIntersection> ReadBinary(bool log)
         {
             BinaryFormatter formatter = new BinaryFormatter();
 
             FileStream fs = new FileStream(Path.Combine(Application.StartupPath, "Resources/" +
                 "teacher.dat"), FileMode.OpenOrCreate);
 
-            MulticlassSupportVectorMachine<IKernel> multiclassSupportVectorLearning =
-                (MulticlassSupportVectorMachine<IKernel>)formatter.Deserialize(fs);
+            MulticlassSupportVectorMachine<HistogramIntersection> multiclassSupportVectorLearning =
+                (MulticlassSupportVectorMachine<HistogramIntersection>)formatter.Deserialize(fs);
 
             fs.Close();
 

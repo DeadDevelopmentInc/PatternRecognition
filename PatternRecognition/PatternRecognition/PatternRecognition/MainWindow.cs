@@ -28,77 +28,101 @@ namespace Test
     
     public partial class MainWindow : Form
     {
-        private int numberofwords = 124;
+        //const number of words
+        private const int numberofwords = 256;
+
+        //const int number of trainning images
         private const int V = 280;
+
+        //List with contain keys and names of classes 
         SortedList<int, string> Animals = new SortedList<int, string>();
 
+        //matrix of vectors input information for trsinning
         double[][] inputsInfo = new double[V][];
+
+        //array of results number of class for trainning
         int[] outputResult = new int[V];
                 
-        MulticlassSupportVectorMachine<IKernel> multiSVM;
+        //Create empty multiclass support vector machine
+        MulticlassSupportVectorMachine<HistogramIntersection> multiSVM;
 
+        //Create file dialog, for users, which upload image
         OpenFileDialog openFileDialog = new OpenFileDialog();
-        
-        IBagOfWords<Bitmap> bow;
 
+        //Empty bag of visual words for calculate class of image
+        BagOfVisualWords bcf;
+
+        //Dictionary of trainning image, which be used for trainning SVM
         private Dictionary<int, Bitmap> originalTrainImages;
 
+        /// <summary>
+        /// Main constructor for windows form
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
 
-            openFileDialog.DefaultExt = ".tif";
+            //Add properties for openFileDialog
+            openFileDialog.DefaultExt = ".tif | .jpg";
             openFileDialog.Title = "Open Image";
             openFileDialog.Filter = "JPEG files (*.jpg)|*.jpg |TIFF files (*.tif)| *.tif|" +
                 " All files | *.*";
 
-
+            //Close button Yes and No, which user click for assert recognition
             labelCorrect.Visible = false;
             buttonCorrectYes.Visible = false;
             buttonCorrectYes.Visible = false;
             this.BackColor = Color.White;
 
-            Animals.Add(0, "Butterflys");
-            Animals.Add(1, "Cow");
-            Animals.Add(2, "Monkey");
-            Animals.Add(3, "Spider");
-
-            /*Animals.Add(0, "Bird");
-            Animals.Add(1, "Butterflys");
-            Animals.Add(2, "Cow");
-            Animals.Add(3, "Crocodile");
-            Animals.Add(4, "Deer");
-            Animals.Add(5, "Dog");
-            Animals.Add(6, "Dolphine ");
-            Animals.Add(7, "Duck");
-            Animals.Add(8, "Elephant");
-            Animals.Add(9, "Fish");
-            Animals.Add(10, "Flyingbird");
-            Animals.Add(11, "Hen");
-            Animals.Add(12, "Horse");
-            Animals.Add(13, "Leopard");
-            Animals.Add(14, "Monkey");
-            Animals.Add(15, "Rabbit");
-            Animals.Add(16, "Rat");
-            Animals.Add(17, "Spider");
-            Animals.Add(18, "Tortoise");*/
-
+            //Read ready SVM and bcf
             multiSVM = BinarySave.ReadBinary(true);
 
-            bow = BinarySave.ReadBinary();
+            bcf = BinarySave.ReadBinary();
         }
 
+        /// <summary>
+        /// Override method? which called with start application
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            //Find directory for scan folders and images
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Res"));
+
+            //Number of folders
+            int i = 0;
+
+            foreach(DirectoryInfo classFolder in path.EnumerateDirectories())
+            {
+                //Create new class of images
+                Animals.Add(i, classFolder.ToString());
+                i++;
+            }
+        }
+
+        /// <summary>
+        /// Call dialog for upload images, with user take
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
+            //If classification call two ore more times we need close some buttons,
+            //such as buttons Yes and No
             labelCorrect.Visible = false;
             buttonCorrectYes.Visible = false;
             buttonCorrectNo.Visible = false;
             this.BackColor = Color.White;
 
+            //Upload image
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                //Try to upload image
                 try
                 {
+                    //If user take image, we display this image
                     if (openFileDialog.OpenFile() != null)
                     {
                         pictureBox1.Image = new Bitmap(openFileDialog.OpenFile());
@@ -106,36 +130,53 @@ namespace Test
                         pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                     }
                 }
+                //Display exception
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
                 }
             }
 
+            //Show button for classify
             buttonClassify.Visible = true;
         }
 
+        /// <summary>
+        /// Classify user's image
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonClassify_Click(object sender, EventArgs e)
         {
+            //Create bitmap for recognition users's image
             Bitmap image = (Bitmap)(pictureBox1.Image);
 
+            //Create Canny detector for contours
             CannyEdgeDetector filterCanny = new CannyEdgeDetector();
 
+            //Detect contour on image
             filterCanny.ApplyInPlace(image);
 
-            double[] featureVector = (bow as ITransform<Bitmap, double[]>).Transform(image);
+            //Transform image in feature vector
+            double[] featureVector = (bcf as ITransform<Bitmap, double[]>).Transform(image);
+            
+            //SVM decide from which class this image
+            string animal = GetAnimalClass(this.multiSVM.Decide(featureVector));
 
-            int a = this.multiSVM.Decide(featureVector);
-
-            string animal = GetAnimalClass(a);
-
+            //display this information for user
             label2.Text = "This is: " + animal + "?";
 
+            //Show buttons to analyse correct detect
             labelCorrect.Visible = true;
             buttonCorrectYes.Visible = true;
             buttonCorrectNo.Visible = true;
         }
 
+        /// <summary>
+        /// Take key of class and return they value
+        /// </summary>
+        /// <param name="i">This is number of class, which contain this iamge </param>
+        /// <returns>Name of class</returns>
         private string GetAnimalClass(int i)
         {
             foreach(KeyValuePair<int, string> kvp in Animals)
@@ -147,6 +188,12 @@ namespace Test
             return "Coincidence not found";
         }
 
+        /// <summary>
+        /// Static method to upload images from folder
+        /// </summary>
+        /// <param name="dir">Where find objects</param>
+        /// <param name="extensions">With this extension</param>
+        /// <returns></returns>
         public static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, 
             params string[] extensions)
         {
@@ -156,10 +203,16 @@ namespace Test
             return files.Where(f => extensions.Contains(f.Extension));
         }
 
+        /// <summary>
+        /// This methods only for admin, and this recompute bcf and svm
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonCompute_Click(object sender, EventArgs e)
         {
             DirectoryInfo path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Res"));
             
+            ///Create dictionary for train images
             originalTrainImages = new Dictionary<int, Bitmap>();
 
             int j = 0;
@@ -168,90 +221,108 @@ namespace Test
 
             foreach (DirectoryInfo classFolder in path.EnumerateDirectories())
             {
+                ///Add name of folder
                 string name = classFolder.Name;
 
+                ///Upload all files in aarray
                 FileInfo[] files = GetFilesByExtensions(classFolder, ".jpg", ".tif").ToArray();
 
+                //Shuffle objects in array
                 Vector.Shuffle(files);
+
+                //For each image complite some easy operations
                 for (int i = 0; i < files.Length; i++)
                 {
-                    FileInfo file = files[i];
-
-                    Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
-
-                    CannyEdgeDetector filterCanny = new CannyEdgeDetector();
-
-                    filterCanny.ApplyInPlace(image);
-
-                    string shortName = file.Name;
-                    int imageKey = j;
-
+                    //Uploat only train images
                     if ((i / (double)files.Length) < 0.7)
                     {
+                        //Add file
+                        FileInfo file = files[i];
+
+                        //Create image from file
+                        Bitmap image = (Bitmap)Bitmap.FromFile(file.FullName);
+
+                        //Use detector
+                        CannyEdgeDetector filterCanny = new CannyEdgeDetector();
+
+                        //Apply changes
+                        filterCanny.ApplyInPlace(image);
+
+                        //Add some information of image
+                        string shortName = file.Name;
+                        int imageKey = j;
+
+                        //Add image to dictionary
                         originalTrainImages.Add(j, image);
+
+                        //Save correct key of class for image
                         outputResult[j] = k;
                         j++;
                     }
                 }
-
+                //Change key of folder
                 k++;
             }
 
-
-            var teacher = new MulticlassSupportVectorLearning<IKernel>()
+            //Create teacher for svm? using Histogram Intersection
+            var teacher = new MulticlassSupportVectorLearning<HistogramIntersection>()
             {
-
-                Learner = (param) =>
+                //Add leaner params
+                Learner = (param) => new SequentialMinimalOptimization<HistogramIntersection>()
                 {
-                    return new SequentialMinimalOptimization<IKernel>()
-                    {
-                        Kernel = new Gaussian(0.25),
-                        //Complexity = 400,
-                        UseComplexityHeuristic = true,
-                        Tolerance = 0.001,
-                        CacheSize = 2048,
-                        UseKernelEstimation = true,
-                    };
+                    //Create kernel with optimal params
+                    Kernel = new HistogramIntersection(0.25, 1),
                 }
             };
 
+            //Create KMeans algr
             var kmodes = new KModes<byte>(numberofwords, new Hamming());
+
+            //Create detector
             var detector = new FastRetinaKeypointDetector();
-
-            // Create bag-of-words (BoW) with the given algorithm
-            var surf = new BagOfVisualWords<FastRetinaKeypoint, byte[]>(detector, kmodes);
             
-            //var freakBow = new BagOfVisualWords<FastRetinaKeypoint, byte[]>(detector, kmodes);
+            //Create bcf
+            bcf = new BagOfVisualWords(numberofwords);
 
-            // Compute the BoW codebook using training images only
-            surf.Learn(originalTrainImages.Values.ToArray());
+            //Learned bcf
+            bcf.Learn(originalTrainImages.Values.ToArray());            
 
-            bow = surf;
-            
-
+            //For each iamge add inputs info
             for (int i = 0; i < originalTrainImages.Count; i++)
             {
                 Bitmap image = originalTrainImages[i] as Bitmap;
 
-                inputsInfo[i] = (bow as ITransform<Bitmap, double[]>).Transform(image);
+                inputsInfo[i] = (bcf as ITransform<Bitmap, double[]>).Transform(image);
             }
 
-            BinarySave.WriteBinary(surf);
+            //Save condition of bcf
+            BinarySave.WriteBinary(bcf);
 
+            //Teach svm
             multiSVM = teacher.Learn(inputsInfo, outputResult);
 
+            //Save condition of svm
             BinarySave.WriteBinary(multiSVM);
 
 
         }
 
+        /// <summary>
+        /// Save params and close program
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void toolStripMenuItem5_Click(object sender, EventArgs e)
         {
-
             Properties.Settings.Default.Save();
             Close();
         }
 
+        /// <summary>
+        /// Change statistic with natural num
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonCorrectYes_Click(object sender, EventArgs e)
         {
             this.BackColor = Color.Green;
@@ -265,6 +336,11 @@ namespace Test
             label2.Text = "Please, upload new image";
         }
 
+        /// <summary>
+        /// Change statictic with negative num
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonCorrectNo_Click(object sender, EventArgs e)
         {
             this.BackColor = Color.Red;
@@ -278,6 +354,11 @@ namespace Test
             label2.Text = "Please, upload new image";
         }
 
+        /// <summary>
+        /// Use if user forgot or unknown password, but need recompute svm
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void changePassToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChangePass form = new ChangePass();
@@ -285,10 +366,16 @@ namespace Test
             
         }
 
+        /// <summary>
+        /// For use it need write password
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void computeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Compute form = new Compute();
             form.ShowDialog();
+            //If password correct
             if (form.GetPass())
             {
                 buttonCompute.Visible = true;
@@ -296,6 +383,11 @@ namespace Test
 
         }
 
+        /// <summary>
+        /// Display average num of true classify
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void averageRecordResToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(((double)Properties.Settings.Default.recognTrue
