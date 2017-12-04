@@ -29,19 +29,19 @@ namespace PatternRecognition
     public partial class MainWindow : Form
     {
         //const number of words
-        private const int numberofwords = 256;
+        private const int numberOfContour = 256;
 
         //const int number of trainning images
-        private const int V = 280;
+        private int V;
 
         //List with contain keys and names of classes 
         SortedList<int, string> Animals = new SortedList<int, string>();
 
         //matrix of vectors input information for trsinning
-        double[][] inputsInfo = new double[V][];
+        double[][] inputsInfo;
 
         //array of results number of class for trainning
-        int[] outputResult = new int[V];
+        int[] outputsResult;
                 
         //Create empty multiclass support vector machine
         MulticlassSupportVectorMachine<HistogramIntersection> multiSVM;
@@ -50,7 +50,7 @@ namespace PatternRecognition
         OpenFileDialog openFileDialog = new OpenFileDialog();
 
         //Empty bag of visual words for calculate class of image
-        BagOfVisualWords bcf;
+        BagOfVisualWords bagOfContourFragments;
 
         //Dictionary of trainning image, which be used for trainning SVM
         private Dictionary<int, Bitmap> originalTrainImages;
@@ -63,9 +63,10 @@ namespace PatternRecognition
             InitializeComponent();
 
             //Add properties for openFileDialog
-            openFileDialog.DefaultExt = ".tif | .jpg";
+            openFileDialog.DefaultExt = ".tif";
+
             openFileDialog.Title = "Open Image";
-            openFileDialog.Filter = "JPEG files (*.jpg)|*.jpg |TIFF files (*.tif)| *.tif|" +
+            openFileDialog.Filter = "JPEG files (*.jpg)| *.jpg|TIFF files (*.tif)| *.tif|" +
                 " All files | *.*";
 
             //Close button Yes and No, which user click for assert recognition
@@ -74,10 +75,10 @@ namespace PatternRecognition
             buttonCorrectYes.Visible = false;
             this.BackColor = Color.White;
 
-            //Read ready SVM and bcf
+            //Read ready SVM and bagOfContourFragments
             multiSVM = BinarySave.ReadBinary(true);
 
-            bcf = BinarySave.ReadBinary();
+            bagOfContourFragments = BinarySave.ReadBinary();
         }
 
         /// <summary>
@@ -100,6 +101,12 @@ namespace PatternRecognition
                 Animals.Add(i, classFolder.ToString());
                 i++;
             }
+
+            V = 70 * i;
+
+            inputsInfo = new double[V][];
+
+            outputsResult = new int[V];
         }
 
         /// <summary>
@@ -158,7 +165,7 @@ namespace PatternRecognition
             filterCanny.ApplyInPlace(image);
 
             //Transform image in feature vector
-            double[] featureVector = (bcf as ITransform<Bitmap, double[]>).Transform(image);
+            double[] featureVector = (bagOfContourFragments as ITransform<Bitmap, double[]>).Transform(image);
             
             //SVM decide from which class this image
             string animal = GetAnimalClass(this.multiSVM.Decide(featureVector));
@@ -204,12 +211,15 @@ namespace PatternRecognition
         }
 
         /// <summary>
-        /// This methods only for admin, and this recompute bcf and svm
+        /// This methods only for admin, and this recompute bagOfContourFragments and svm
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void buttonCompute_Click(object sender, EventArgs e)
         {
+
+            //Accord.Math.Random.Generator.Seed = 1;
+
             DirectoryInfo path = new DirectoryInfo(Path.Combine(Application.StartupPath, "Resources/Res"));
             
             ///Create dictionary for train images
@@ -234,6 +244,7 @@ namespace PatternRecognition
                 for (int i = 0; i < files.Length; i++)
                 {
                     //Uploat only train images
+                    //70%
                     if ((i / (double)files.Length) < 0.7)
                     {
                         //Add file
@@ -256,7 +267,7 @@ namespace PatternRecognition
                         originalTrainImages.Add(j, image);
 
                         //Save correct key of class for image
-                        outputResult[j] = k;
+                        outputsResult[j] = k;
                         j++;
                     }
                 }
@@ -264,7 +275,7 @@ namespace PatternRecognition
                 k++;
             }
 
-            //Create teacher for svm? using Histogram Intersection
+            //Create teacher for svm, using Histogram Intersection
             var teacher = new MulticlassSupportVectorLearning<HistogramIntersection>()
             {
                 //Add leaner params
@@ -276,30 +287,30 @@ namespace PatternRecognition
             };
 
             //Create KMeans algr
-            var kmodes = new KModes<byte>(numberofwords, new Hamming());
+            var kmodes = new KModes<byte>(numberOfContour, new Hamming());
 
             //Create detector
             var detector = new FastRetinaKeypointDetector();
             
-            //Create bcf
-            bcf = new BagOfVisualWords(numberofwords);
+            //Create bagOfContourFragments
+            bagOfContourFragments = new BagOfVisualWords(numberOfContour);
 
-            //Learned bcf
-            bcf.Learn(originalTrainImages.Values.ToArray());            
+            //Learned bagOfContourFragments
+            bagOfContourFragments.Learn(originalTrainImages.Values.ToArray());            
 
             //For each iamge add inputs info
             for (int i = 0; i < originalTrainImages.Count; i++)
             {
                 Bitmap image = originalTrainImages[i] as Bitmap;
 
-                inputsInfo[i] = (bcf as ITransform<Bitmap, double[]>).Transform(image);
+                inputsInfo[i] = (bagOfContourFragments as ITransform<Bitmap, double[]>).Transform(image);
             }
 
-            //Save condition of bcf
-            BinarySave.WriteBinary(bcf);
+            //Save condition of bagOfContourFragments
+            BinarySave.WriteBinary(bagOfContourFragments);
 
             //Teach svm
-            multiSVM = teacher.Learn(inputsInfo, outputResult);
+            multiSVM = teacher.Learn(inputsInfo, outputsResult);
 
             //Save condition of svm
             BinarySave.WriteBinary(multiSVM);

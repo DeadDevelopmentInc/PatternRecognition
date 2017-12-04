@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="PatternRecognition.BinarySave">
+    <Position X="7" Y="8.75" Width="7" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BinarySave.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.ChangePass">
+    <Position X="7" Y="0.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAABAAAACAAAACAAAIAAAAEEAAAAAAAAA=</HashCode>
+      <FileName>ChangePass.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.Compute">
+    <Position X="11" Y="3.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAACAAABAAAACAAAACAAAIAAAEEEAAAAAAAAA=</HashCode>
+      <FileName>Compute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.MainWindow">
+    <Position X="0.5" Y="0.5" Width="5.75" />
+    <TypeIdentifier>
+      <HashCode>A4FCBRYAACAAABACAACWQBACBADoAAwgAEAAwAhRAAA=</HashCode>
+      <FileName>MainWindow.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.Program">
+    <Position X="7" Y="6.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAEA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.Properties.Resources">
+    <Position X="7" Y="3.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PatternRecognition.Properties.Settings">
+    <Position X="11" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAIAAAAAABAAACAAAAAhAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
